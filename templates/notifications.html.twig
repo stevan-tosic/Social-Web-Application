@@ -1,0 +1,89 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        {% include 'sidebar.html.twig' %}
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                {% include 'topbar.html.twig' %}
+                <div class="container-fluid">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Notifications</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Message</th>
+                                            <th>Date</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for notification in notifications %}
+                                            <tr>
+                                                <td>{{ notification.message }}</td>
+                                                <td>{{ notification.created|date("d. F Y. h:i") }}</td>
+                                                <td>
+                                                    <a href="{{ path('join_requests_list') }}" class="joinGroup">
+                                                        Check Join Requests
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include 'footer.html.twig' %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+    $(document).ready(function () {
+      $('#newGroup').click(function () {
+        const url = '{{ path('group_new') }}';
+        const formName = 'form[name=\'group\']';
+        $('#groupModalDialog').load(url, function () {
+          $(formName).on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+              url: url,
+              method: 'POST',
+              data: $(formName).serialize(),
+              success: function (response) {
+                if (response['added'] || response['edited']) {
+                  location.reload();
+                }
+              }
+            });
+          });
+        });
+      });
+
+      $('.joinGroup').click(function () {
+        const groupId = $(this).data('id');
+        let joinGroupUrl = "{{ path('join_request', {'id' : '--groupId--'}) }}";
+        joinGroupUrl = joinGroupUrl.replace('--groupId--', groupId);
+
+        $.ajax({
+          url: joinGroupUrl,
+          method: 'POST',
+          success: function (response) {
+            if (response['joined']) {
+              $('#joinGroupModal').modal('show');
+            }
+          }
+        });
+      });
+    });
+    </script>
+{% endblock %}

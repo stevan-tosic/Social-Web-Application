@@ -1,0 +1,39 @@
+index:
+    path: /
+    methods: GET
+    controller: App\Controller\IndexController
+
+group_new:
+    path: /group
+    methods: [GET, POST]
+    controller: App\Controller\Group\CreateGroupAction
+
+join_request:
+    path: /join-group/{id}
+    methods: POST
+    controller: App\Controller\Group\JoinGroupAction
+
+notifications_list:
+    path: /notifications-list
+    methods: GET
+    controller: App\Controller\NotificationsListAction
+
+join_requests_list:
+    path: /join-requests-list
+    methods: GET
+    controller: App\Controller\Group\JoinRequestsListAction
+
+accept_join_requests:
+    path: /accept-join-requests/{id}
+    methods: POST
+    controller: App\Controller\Group\AcceptJoinRequestAction
+
+refuse_join_requests:
+    path: /refuse-join-requests/{id}
+    methods: DELETE
+    controller: App\Controller\Group\RefuseJoinRequestAction
+
+show_members_list:
+    path: /show-members-list/{id}
+    methods: GET
+    controller: App\Controller\Group\ShowMembersListAction

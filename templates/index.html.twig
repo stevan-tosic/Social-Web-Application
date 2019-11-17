@@ -1,0 +1,122 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        {% include 'sidebar.html.twig' %}
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                {% include 'topbar.html.twig' %}
+                <div class="container-fluid">
+                    <div>
+                        <a href="#" class="btn btn-primary btn-icon-split btn-lg" id="newGroup" data-toggle="modal"
+                           data-target="#newGroupModal">
+                            <span class="icon text-white-50">
+                              <i class="fas fa-plus"></i>
+                            </span>
+                            <span class="text">Create new</span>
+                        </a>
+                    </div>
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">My Groups</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>Group Name</th>
+                                            <th>Admin</th>
+                                            <th>Date Created</th>
+                                            <th>Members</th>
+                                            <th>Join</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for group in groups %}
+                                            <tr>
+                                                <td>{{ group.name }}</td>
+                                                <td>{{ group.admin.fullName }}</td>
+                                                <td>{{ group.created|date('d/m/y') }}</td>
+                                                <td>
+                                                    <a href="#" data-id="{{ group.id }}" class="showMembersList" data-toggle="modal"
+                                                       data-target="#membersList">
+                                                        {{ group.members|length }}
+                                                    </a>
+                                                </td>
+                                                <td>
+                                                    {% if app.user.id != group.admin.id and group.id not in app.user.getGroupMembershipIds() %}
+                                                        <a href="#" class="joinGroup" data-id="{{ group.id }}">
+                                                            <i class="fas fa-sign-in-alt"></i>
+                                                        </a>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include 'footer.html.twig' %}
+        </div>
+    </div>
+
+    <div class="modal fade" id="membersList" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog" id="membersListModalDialog" role="document">
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+    $(document).ready(function () {
+      $('#newGroup').click(function () {
+        const url = '{{ path('group_new') }}';
+        const formName = 'form[name=\'group\']';
+        $('#groupModalDialog').load(url, function () {
+          $(formName).on('submit', function (e) {
+            e.preventDefault();
+
+            $.ajax({
+              url: url,
+              method: 'POST',
+              data: $(formName).serialize(),
+              success: function (response) {
+                if (response['added'] || response['edited']) {
+                  location.reload();
+                }
+              }
+            });
+          });
+        });
+      });
+
+      $('.joinGroup').click(function () {
+        const groupId = $(this).data('id');
+        let joinGroupUrl = "{{ path('join_request', {'id' : '--groupId--'}) }}";
+        joinGroupUrl = joinGroupUrl.replace('--groupId--', groupId);
+
+          $.ajax({
+            url: joinGroupUrl,
+            method: 'POST',
+            success: function (response) {
+              if (response['joined']) {
+                $('#joinGroupModal').modal('show');
+              }
+           }
+        });
+      });
+
+    $('.showMembersList').click(function () {
+        const groupId = $(this).data('id');
+        let showMembersListUrl = "{{ path('show_members_list', {'id' : '--groupId--'}) }}";
+            showMembersListUrl = showMembersListUrl.replace('--groupId--', groupId);
+
+        $('#membersListModalDialog').load(showMembersListUrl);
+      });
+    });
+    </script>
+{% endblock %}

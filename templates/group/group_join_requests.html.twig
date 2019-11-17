@@ -1,0 +1,93 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <div id="wrapper">
+        {% include 'sidebar.html.twig' %}
+        <div id="content-wrapper" class="d-flex flex-column">
+            <div id="content">
+                {% include 'topbar.html.twig' %}
+                <div class="container-fluid">
+                    <div class="card shadow mb-4">
+                        <div class="card-header py-3">
+                            <h6 class="m-0 font-weight-bold text-primary">Join Requests</h6>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-bordered" id="dataTable" width="100%" cellspacing="0">
+                                    <thead>
+                                        <tr>
+                                            <th>User</th>
+                                            <th>Group</th>
+                                            <th>Requested</th>
+                                            <th>Action</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for joinRequest in joinRequests %}
+                                            <tr>
+                                                <td>{{ joinRequest.user.fullname }}</td>
+                                                <td>{{ joinRequest.group.name }}</td>
+                                                <td>{{ joinRequest.requested|date("d. F Y. h:i") }}</td>
+                                                <td>
+                                                    <a href="#" data-id="{{ joinRequest.id }}" class="acceptRequest">
+                                                        Accept
+                                                    </a>
+                                                    <a href="#" data-id="{{ joinRequest.id }}" class="refuseRequest">
+                                                        Refuse
+                                                    </a>
+                                                </td>
+                                            </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% include 'footer.html.twig' %}
+        </div>
+    </div>
+{% endblock %}
+
+{% block javascripts %}
+    <script>
+    $(document).ready(function () {
+      $('.refuseRequest').click(function () {
+        const requestId = $(this).data('id');
+        alert(requestId);
+        let requestIdUrl = "{{ path('refuse_join_requests', {'id' : '--requestId--'}) }}";
+        requestIdUrl = requestIdUrl.replace('--requestId--', requestId);
+
+        $.ajax({
+          url: requestIdUrl,
+          method: 'DELETE',
+          success: function (response) {
+            if (response['refused']) {
+              alert('ok');
+              $('#joinGroupModal').modal('show');
+            }
+          }
+        });
+      });
+
+      $('.acceptRequest').click(function () {
+        const requestId = $(this).data('id');
+        alert(requestId);
+        let requestIdUrl = "{{ path('accept_join_requests', {'id' : '--requestId--'}) }}";
+        requestIdUrl = requestIdUrl.replace('--requestId--', requestId);
+
+        $.ajax({
+          url: requestIdUrl,
+          method: 'POST',
+          success: function (response) {
+            if (response['accepted']) {
+              alert('ok');
+              $('#joinGroupModal').modal('show');
+            }
+          }
+        });
+      });
+    });
+    </script>
+{% endblock %}
