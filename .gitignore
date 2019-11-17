@@ -1,6 +1,8 @@
 # Email spool folder
 /app/spool/*
 
+.idea/
+.env
 # Logs (Symfony4)
 /var/log/*
 !var/log/.gitkeep
