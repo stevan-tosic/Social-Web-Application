@@ -1,4 +1,4 @@
-# EQS Social Web Application
+# Social Web Application
 
 ## Software Requirements
  - MySql 5.7
