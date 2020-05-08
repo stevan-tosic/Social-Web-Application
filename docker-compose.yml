@@ -1,0 +1,65 @@
+version: "3.6"
+
+services:
+    nginx:
+        image: nginx:alpine
+        container_name: classic-trader-nginx
+        working_dir: /application
+        volumes:
+            - .:/application
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - php
+        ports:
+            - "12090:80"
+    php:
+        environment:
+            - PHP_IDE_CONFIG=serverName=localhost
+        container_name: classic-trader-php
+        build:
+            context: ./
+            dockerfile: docker/php/Dockerfile
+            cache_from:
+                - ./docker/php
+        depends_on:
+            - mariadb
+        links:
+            - mailhog
+            - mariadb
+        volumes:
+            - ./:/application:rw,cached
+            - /usr/local/lib
+            - ./:/root/.npm/_cacache/tmp
+    mariadb:
+        image: mariadb/server:10.3
+        container_name: classic-trader-db
+        working_dir: /application
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+            - MYSQL_DATABASE=classic-trader
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=password
+        volumes:
+          - sql-data:/var/lib/mysql
+        ports:
+            - "12092:3306"
+        expose:
+            - 12092
+        command:
+            'mysqld --innodb-flush-method=fsync --innodb-use-native-aio=0'
+    mailhog:
+      image: mailhog/mailhog
+      container_name: classic-trader-mailhog
+      command:
+        - '-smtp-bind-addr'
+        - '0.0.0.0:25'
+      user: root
+      expose:
+        - 25
+        - 8025
+      ports:
+        - '8026:8025'
+      healthcheck:
+        test: echo | telnet 127.0.0.1 25
+volumes:
+    sql-data:
