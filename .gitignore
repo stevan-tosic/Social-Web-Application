@@ -5,6 +5,7 @@
 .env
 # Logs (Symfony4)
 /var/log/*
+/var/cache/*
 !var/log/.gitkeep
 
 # Parameters
